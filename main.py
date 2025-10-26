@@ -72,7 +72,10 @@ def run_reporter_agent(agent_folder, agent_name, outputs_folder):
                 for file in os.listdir(reporter_output_dir):
                     src = os.path.join(reporter_output_dir, file)
                     dest = os.path.join(agent_output_dir, file)
-                    shutil.copy(src, dest)
+                    if os.path.isdir(src):
+                        shutil.copytree(src, dest, dirs_exist_ok=True)
+                    else:
+                        shutil.copy(src, dest)
                     print(f"{Fore.LIGHTCYAN_EX}Collected {file} from {agent_name} to {dest}{Style.RESET_ALL}")
 
             # Copy the entirety of the reporter agent repo to the collected reports area
@@ -115,7 +118,10 @@ def run_organizer_agent(agent_folder, agent_name, outputs_folder, param):
                 for file in os.listdir(organizer_output_dir):
                     src = os.path.join(organizer_output_dir, file)
                     dest = os.path.join(agent_output_dir, file)
-                    shutil.copy(src, dest)
+                    if os.path.isdir(src):
+                        shutil.copytree(src, dest, dirs_exist_ok=True)
+                    else:
+                        shutil.copy(src, dest)
                     print(f"{Fore.LIGHTMAGENTA_EX}Collected {file} from {agent_name} to {dest}{Style.RESET_ALL}")
         except subprocess.CalledProcessError as e:
             print(f"{Fore.RED}Failed to run {agent_name}: {e}{Style.RESET_ALL}")
