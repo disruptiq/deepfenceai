@@ -35,6 +35,24 @@ def run_mapper_agent(agent_folder, agent_name, outputs_folder, param):
     else:
         print(f"main.py not found in {agent_folder}")
 
+def run_reporter_agent(agent_folder, agent_name, outputs_folder):
+    """Run the reporter agent and collect its output.json."""
+    main_py = os.path.join(agent_folder, 'main.py')
+    if os.path.exists(main_py):
+        try:
+            subprocess.run(['python', 'main.py'], cwd=agent_folder, check=True)
+            output_json = os.path.join(agent_folder, 'output.json')
+            if os.path.exists(output_json):
+                dest = os.path.join(outputs_folder, f"{agent_name}_output.json")
+                shutil.copy(output_json, dest)
+                print(f"Collected output from {agent_name} to {dest}")
+            else:
+                print(f"output.json not found in {agent_folder}")
+        except subprocess.CalledProcessError as e:
+            print(f"Failed to run {agent_name}: {e}")
+    else:
+        print(f"main.py not found in {agent_folder}")
+
 def run_organizer_agent(agent_folder, agent_name, outputs_folder, param):
     """Run the organizer agent."""
     main_py = os.path.join(agent_folder, 'main.py')
@@ -67,9 +85,24 @@ def main():
     with open('config.json', 'r') as f:
         config = json.load(f)
 
+    # Archive existing outputs if present
+    archive_folder = 'archive'
+    os.makedirs(archive_folder, exist_ok=True)
+    outputs_folder = 'outputs'
+    if os.path.exists(outputs_folder):
+        # Find the next archive number
+        existing_archives = [f for f in os.listdir(archive_folder) if f.startswith('output-') and f[7:].isdigit()]
+        if existing_archives:
+            nums = [int(f[7:]) for f in existing_archives]
+            next_num = max(nums) + 1
+        else:
+            next_num = 1
+        archive_dest = os.path.join(archive_folder, f"output-{next_num:05d}")
+        shutil.move(outputs_folder, archive_dest)
+        print(f"Archived existing outputs to {archive_dest}")
+
     # Create directories
     agents_folder = 'agents'
-    outputs_folder = 'outputs'
     os.makedirs(agents_folder, exist_ok=True)
     os.makedirs(outputs_folder, exist_ok=True)
 
@@ -106,6 +139,12 @@ def main():
         name = agent['name']
         agent_folder = os.path.join(agents_folder, name)
         run_organizer_agent(agent_folder, name, outputs_folder, param)
+
+    # Run reporter agent after organizers complete
+    if reporter:
+        name = reporter['name']
+        agent_folder = os.path.join(agents_folder, name)
+        run_reporter_agent(agent_folder, name, outputs_folder)
 
 if __name__ == '__main__':
     main()
