@@ -75,24 +75,22 @@ def run_reporter_agent(agent_folder, agent_name, outputs_folder):
                     shutil.copy(src, dest)
                     print(f"{Fore.LIGHTCYAN_EX}Collected {file} from {agent_name} to {dest}{Style.RESET_ALL}")
 
-            # Copy the entirety of the output folder in the subagent to the collected reports area
-            reporter_reports_dir = os.path.join(agent_folder, 'reports')
-            if os.path.exists(reporter_reports_dir):
-                collected_reports_dir = os.path.join(outputs_folder, 'reporter_reports')
-                shutil.copytree(reporter_reports_dir, collected_reports_dir, dirs_exist_ok=True)
-                print(f"{Fore.GREEN}Copied reporter output folder to collected reports area: {collected_reports_dir}{Style.RESET_ALL}")
+            # Copy the entirety of the reporter agent repo to the collected reports area
+            collected_reports_dir = os.path.join(outputs_folder, 'reporter_reports')
+            shutil.copytree(agent_folder, collected_reports_dir, dirs_exist_ok=True)
+            print(f"{Fore.GREEN}Copied entire reporter agent repo to collected reports area: {collected_reports_dir}{Style.RESET_ALL}")
 
-                # Recursively find the HTML document in that dir and open it
-                html_files = list(pathlib.Path(collected_reports_dir).rglob("*.html"))
-                if html_files:
-                    html_file = str(html_files[0])  # Take the first one
-                    print(f"{Fore.BLUE}Opening HTML report: {html_file}{Style.RESET_ALL}")
-                    try:
-                        os.startfile(html_file)  # For Windows
-                    except AttributeError:
-                        webbrowser.open(html_file)  # Fallback
-                else:
-                    print(f"{Fore.YELLOW}No HTML report found in collected reports area.{Style.RESET_ALL}")
+            # Recursively find the HTML document in that dir and open it
+            html_files = list(pathlib.Path(collected_reports_dir).rglob("*.html"))
+            if html_files:
+                html_file = str(html_files[0])  # Take the first one
+                print(f"{Fore.BLUE}Opening HTML report: {html_file}{Style.RESET_ALL}")
+                try:
+                    os.startfile(html_file)  # For Windows
+                except AttributeError:
+                    webbrowser.open(html_file)  # Fallback
+            else:
+                print(f"{Fore.YELLOW}No HTML report found in collected reports area.{Style.RESET_ALL}")
         except subprocess.CalledProcessError as e:
             print(f"{Fore.RED}Failed to run {agent_name}: {e}{Style.RESET_ALL}")
     else:
