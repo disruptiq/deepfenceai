@@ -2,6 +2,7 @@ import json
 import os
 import subprocess
 import shutil
+import sys
 
 def clone_repo(repo_url, dest_folder):
     """Clone a GitHub repository to the specified folder."""
@@ -11,12 +12,12 @@ def clone_repo(repo_url, dest_folder):
     except subprocess.CalledProcessError as e:
         print(f"Failed to clone {repo_url}: {e}")
 
-def run_mapper_agent(agent_folder, agent_name, outputs_folder):
+def run_mapper_agent(agent_folder, agent_name, outputs_folder, param):
     """Run the mapper agent and collect its output.json."""
     main_py = os.path.join(agent_folder, 'main.py')
     if os.path.exists(main_py):
         try:
-            subprocess.run(['python', 'main.py'], cwd=agent_folder, check=True)
+            subprocess.run(['python', 'main.py', param], cwd=agent_folder, check=True)
             output_json = os.path.join(agent_folder, 'output.json')
             if os.path.exists(output_json):
                 dest = os.path.join(outputs_folder, f"{agent_name}_output.json")
@@ -30,6 +31,12 @@ def run_mapper_agent(agent_folder, agent_name, outputs_folder):
         print(f"main.py not found in {agent_folder}")
 
 def main():
+    # Get param from command line
+    if len(sys.argv) < 2:
+        print("Usage: python main.py <param>")
+        sys.exit(1)
+    param = sys.argv[1]
+
     # Load config
     with open('config.json', 'r') as f:
         config = json.load(f)
@@ -66,7 +73,7 @@ def main():
     for agent in config.get('mapper_agents', []):
         name = agent['name']
         agent_folder = os.path.join(agents_folder, name)
-        run_mapper_agent(agent_folder, name, outputs_folder)
+        run_mapper_agent(agent_folder, name, outputs_folder, param)
 
 if __name__ == '__main__':
     main()
