@@ -84,11 +84,16 @@ def run_reporter_agent(agent_folder, agent_name, outputs_folder):
             html_files = list(pathlib.Path(collected_reports_dir).rglob("*.html"))
             if html_files:
                 html_file = str(html_files[0])  # Take the first one
-                print(f"{Fore.BLUE}Opening HTML report: {html_file}{Style.RESET_ALL}")
+                print(f"{Fore.BLUE}HTML report available at: {html_file}{Style.RESET_ALL}")
                 try:
-                    os.startfile(html_file)  # For Windows
-                except AttributeError:
-                    webbrowser.open(html_file)  # Fallback
+                    if os.name == 'nt':  # Windows
+                        os.startfile(html_file)
+                        print(f"{Fore.BLUE}Opened HTML report in default application.{Style.RESET_ALL}")
+                    else:
+                        webbrowser.open(html_file)
+                        print(f"{Fore.BLUE}Opened HTML report in web browser.{Style.RESET_ALL}")
+                except Exception as e:
+                    print(f"{Fore.YELLOW}Unable to open HTML report automatically (likely no GUI available): {e}. Report is available at {html_file}{Style.RESET_ALL}")
             else:
                 print(f"{Fore.YELLOW}No HTML report found in collected reports area.{Style.RESET_ALL}")
         except subprocess.CalledProcessError as e:
