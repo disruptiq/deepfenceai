@@ -5,12 +5,17 @@ import shutil
 import sys
 
 def clone_repo(repo_url, dest_folder):
-    """Clone a GitHub repository to the specified folder."""
+    """Clone or update a GitHub repository in the specified folder."""
     try:
-        subprocess.run(['git', 'clone', repo_url, dest_folder], check=True)
-        print(f"Cloned {repo_url} to {dest_folder}")
+        if os.path.exists(dest_folder):
+            # Assume it's a git repo, pull updates
+            subprocess.run(['git', 'pull'], cwd=dest_folder, check=True)
+            print(f"Updated {repo_url} in {dest_folder}")
+        else:
+            subprocess.run(['git', 'clone', repo_url, dest_folder], check=True)
+            print(f"Cloned {repo_url} to {dest_folder}")
     except subprocess.CalledProcessError as e:
-        print(f"Failed to clone {repo_url}: {e}")
+        print(f"Failed to clone/update {repo_url}: {e}")
 
 def run_mapper_agent(agent_folder, agent_name, outputs_folder, param):
     """Run the mapper agent and collect its output.json."""
@@ -35,7 +40,7 @@ def main():
     if len(sys.argv) < 2:
         print("Usage: python main.py <param>")
         sys.exit(1)
-    param = sys.argv[1]
+    param = os.path.abspath(sys.argv[1])
 
     # Load config
     with open('config.json', 'r') as f:
