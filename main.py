@@ -35,6 +35,25 @@ def run_mapper_agent(agent_folder, agent_name, outputs_folder, param):
     else:
         print(f"main.py not found in {agent_folder}")
 
+def run_organizer_agent(agent_folder, agent_name, outputs_folder, param):
+    """Run the organizer agent."""
+    main_py = os.path.join(agent_folder, 'main.py')
+    if os.path.exists(main_py):
+        try:
+            subprocess.run(['python', 'main.py'], cwd=agent_folder, check=True)
+            # Organizers may produce outputs in their own output dir; collect if present
+            organizer_output_dir = os.path.join(agent_folder, 'output')
+            if os.path.exists(organizer_output_dir):
+                for file in os.listdir(organizer_output_dir):
+                    src = os.path.join(organizer_output_dir, file)
+                    dest = os.path.join(outputs_folder, f"{agent_name}_{file}")
+                    shutil.copy(src, dest)
+                    print(f"Collected {file} from {agent_name} to {dest}")
+        except subprocess.CalledProcessError as e:
+            print(f"Failed to run {agent_name}: {e}")
+    else:
+        print(f"main.py not found in {agent_folder}")
+
 def main():
     # Get param from command line
     if len(sys.argv) < 2:
@@ -79,6 +98,12 @@ def main():
         name = agent['name']
         agent_folder = os.path.join(agents_folder, name)
         run_mapper_agent(agent_folder, name, outputs_folder, param)
+
+    # Run organizer agents after mappers complete
+    for agent in config.get('organizer_agents', []):
+        name = agent['name']
+        agent_folder = os.path.join(agents_folder, name)
+        run_organizer_agent(agent_folder, name, outputs_folder, param)
 
 if __name__ == '__main__':
     main()
