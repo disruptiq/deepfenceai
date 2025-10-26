@@ -16,7 +16,7 @@ def run_mapper_agent(agent_folder, agent_name, outputs_folder):
     main_py = os.path.join(agent_folder, 'main.py')
     if os.path.exists(main_py):
         try:
-            subprocess.run(['python', main_py], cwd=agent_folder, check=True)
+            subprocess.run(['python', 'main.py'], cwd=agent_folder, check=True)
             output_json = os.path.join(agent_folder, 'output.json')
             if os.path.exists(output_json):
                 dest = os.path.join(outputs_folder, f"{agent_name}_output.json")

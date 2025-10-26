@@ -1,7 +1,7 @@
 {
   "mapper_agents": [
     {
-      "name": "layer-1-mapper",
+      "name": "mapper-agent",
       "repo": "https://github.com/disruptiq/mapper-agent"
     }
   ],
