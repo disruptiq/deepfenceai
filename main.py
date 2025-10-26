@@ -44,9 +44,11 @@ def run_organizer_agent(agent_folder, agent_name, outputs_folder, param):
             # Organizers may produce outputs in their own output dir; collect if present
             organizer_output_dir = os.path.join(agent_folder, 'output')
             if os.path.exists(organizer_output_dir):
+                agent_output_dir = os.path.join(outputs_folder, agent_name)
+                os.makedirs(agent_output_dir, exist_ok=True)
                 for file in os.listdir(organizer_output_dir):
                     src = os.path.join(organizer_output_dir, file)
-                    dest = os.path.join(outputs_folder, f"{agent_name}_{file}")
+                    dest = os.path.join(agent_output_dir, file)
                     shutil.copy(src, dest)
                     print(f"Collected {file} from {agent_name} to {dest}")
         except subprocess.CalledProcessError as e:
