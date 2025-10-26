@@ -1,0 +1,15 @@
+click>=8.0.0
+pyyaml>=6.0
+requests>=2.25.0
+jinja2>=3.0.0
+rich>=12.0.0
+pydantic>=1.8.0
+asyncio-mqtt>=0.11.0
+pathlib2>=2.3.0
+pathspec==0.12.1
+aiofiles
+python-dotenv
+toml
+requests
+psutil
+colorama>=0.4.6
