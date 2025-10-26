@@ -17,82 +17,8 @@ except ImportError:
 
 def print_ascii_art(stage, message):
     """Print ASCII art for a stage with color."""
-    arts = {
-        'start': f"""
-{Fore.GREEN}╔══════════════════════════════════════════════════════════════════╗
-║                                                                  ║
-║  🚀 {Fore.YELLOW}DeepFence AI - Starting the Journey{Fore.GREEN} 🚀                        ║
-║                                                                  ║
-╚══════════════════════════════════════════════════════════════════╝{Style.RESET_ALL}
-""",
-        'config': f"""
-{Fore.BLUE}╔══════════════════════════════════════════════════════════════════╗
-║                                                                  ║
-║  ⚙️  {Fore.CYAN}Loading Configuration{Fore.BLUE} ⚙️                                   ║
-║                                                                  ║
-╚══════════════════════════════════════════════════════════════════╝{Style.RESET_ALL}
-""",
-        'archive': f"""
-{Fore.MAGENTA}╔══════════════════════════════════════════════════════════════════╗
-║                                                                  ║
-║  📦 {Fore.RED}Archiving Previous Outputs{Fore.MAGENTA} 📦                             ║
-║                                                                  ║
-╚══════════════════════════════════════════════════════════════════╝{Style.RESET_ALL}
-""",
-        'dirs': f"""
-{Fore.CYAN}╔══════════════════════════════════════════════════════════════════╗
-║                                                                  ║
-║  📁 {Fore.GREEN}Preparing Directories{Fore.CYAN} 📁                                 ║
-║                                                                  ║
-╚══════════════════════════════════════════════════════════════════╝{Style.RESET_ALL}
-""",
-        'clone': f"""
-{Fore.YELLOW}╔══════════════════════════════════════════════════════════════════╗
-║                                                                  ║
-║  🔄 {Fore.RED}Cloning Agent Repositories{Fore.YELLOW} 🔄                            ║
-║                                                                  ║
-╚══════════════════════════════════════════════════════════════════╝{Style.RESET_ALL}
-""",
-        'run': f"""
-{Fore.GREEN}╔══════════════════════════════════════════════════════════════════╗
-║                                                                  ║
-║  ▶️  {Fore.BLUE}Running Agents{Fore.GREEN} ▶️                                        ║
-║                                                                  ║
-╚══════════════════════════════════════════════════════════════════╝{Style.RESET_ALL}
-""",
-        'mapper': f"""
-{Fore.BLUE}╔══════════════════════════════════════════════════════════════════╗
-║                                                                  ║
-║  🗺️  {Fore.CYAN}Executing Mapper Agents{Fore.BLUE} 🗺️                               ║
-║                                                                  ║
-╚══════════════════════════════════════════════════════════════════╝{Style.RESET_ALL}
-""",
-        'organizer': f"""
-{Fore.MAGENTA}╔══════════════════════════════════════════════════════════════════╗
-║                                                                  ║
-║  📋 {Fore.RED}Executing Organizer Agents{Fore.MAGENTA} 📋                            ║
-║                                                                  ║
-╚══════════════════════════════════════════════════════════════════╝{Style.RESET_ALL}
-""",
-        'reporter': f"""
-{Fore.CYAN}╔══════════════════════════════════════════════════════════════════╗
-║                                                                  ║
-║  📊 {Fore.GREEN}Generating Reports{Fore.CYAN} 📊                                    ║
-║                                                                  ║
-╚══════════════════════════════════════════════════════════════════╝{Style.RESET_ALL}
-""",
-        'complete': f"""
-{Fore.GREEN}╔══════════════════════════════════════════════════════════════════╗
-║                                                                  ║
-║  ✅ {Fore.YELLOW}All Tasks Completed Successfully{Fore.GREEN} ✅                         ║
-║                                                                  ║
-╚══════════════════════════════════════════════════════════════════╝{Style.RESET_ALL}
-"""
-    }
-    art = arts.get(stage, "")
-    if art:
-        print(art)
-    print(f"{Fore.WHITE}{message}{Style.RESET_ALL}")
+    print(f"{Fore.CYAN}[{stage.upper()}] {message}{Style.RESET_ALL}")
+
 
 def clone_repo(repo_url, dest_folder):
     """Clone or update a GitHub repository in the specified folder."""
@@ -126,18 +52,39 @@ def run_mapper_agent(agent_folder, agent_name, outputs_folder, param):
         print(f"{Fore.YELLOW}main.py not found in {agent_folder}{Style.RESET_ALL}")
 
 def run_reporter_agent(agent_folder, agent_name, outputs_folder):
-    """Run the reporter agent and collect its output.json."""
+    """Run the reporter agent and collect its output files."""
     main_py = os.path.join(agent_folder, 'main.py')
     if os.path.exists(main_py):
         try:
-            subprocess.run(['python', 'main.py'], cwd=agent_folder, check=True)
+            subprocess.run(['python', 'main.py', os.path.abspath(outputs_folder)], cwd=agent_folder, check=True)
+            # Check for output.json first
             output_json = os.path.join(agent_folder, 'output.json')
             if os.path.exists(output_json):
                 dest = os.path.join(outputs_folder, f"{agent_name}_output.json")
                 shutil.copy(output_json, dest)
-                print(f"{Fore.GREEN}Collected output from {agent_name} to {dest}{Style.RESET_ALL}")
+                print(f"{Fore.GREEN}Collected JSON output from {agent_name} to {dest}{Style.RESET_ALL}")
             else:
                 print(f"{Fore.YELLOW}output.json not found in {agent_folder}{Style.RESET_ALL}")
+
+            # Check for output.html
+            output_html = os.path.join(agent_folder, 'output.html')
+            if os.path.exists(output_html):
+                dest = os.path.join(outputs_folder, f"{agent_name}_report.html")
+                shutil.copy(output_html, dest)
+                print(f"{Fore.GREEN}Collected HTML report from {agent_name} to {dest}{Style.RESET_ALL}")
+            else:
+                print(f"{Fore.YELLOW}output.html not found in {agent_folder}{Style.RESET_ALL}")
+
+            # Also check for output directory like organizers
+            reporter_output_dir = os.path.join(agent_folder, 'output')
+            if os.path.exists(reporter_output_dir):
+                agent_output_dir = os.path.join(outputs_folder, agent_name)
+                os.makedirs(agent_output_dir, exist_ok=True)
+                for file in os.listdir(reporter_output_dir):
+                    src = os.path.join(reporter_output_dir, file)
+                    dest = os.path.join(agent_output_dir, file)
+                    shutil.copy(src, dest)
+                    print(f"{Fore.GREEN}Collected {file} from {agent_name} to {dest}{Style.RESET_ALL}")
         except subprocess.CalledProcessError as e:
             print(f"{Fore.RED}Failed to run {agent_name}: {e}{Style.RESET_ALL}")
     else:
