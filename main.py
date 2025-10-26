@@ -4,20 +4,7 @@ import subprocess
 import shutil
 import sys
 
-try:
-    import colorama
-    colorama.init()
-    from colorama import Fore, Back, Style
-except ImportError:
-    print("colorama not installed. Installing...")
-    subprocess.run([sys.executable, '-m', 'pip', 'install', 'colorama'], check=True)
-    import colorama
-    colorama.init()
-    from colorama import Fore, Back, Style
-
-def print_ascii_art(stage, message):
-    """Print ASCII art for a stage with color."""
-    print(f"{Fore.CYAN}[{stage.upper()}] {message}{Style.RESET_ALL}")
+from src.ascii_art import print_ascii_art, Fore, Style
 
 
 def clone_repo(repo_url, dest_folder):
