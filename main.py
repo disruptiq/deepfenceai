@@ -13,7 +13,7 @@ def clone_repo(repo_url, dest_folder):
         if os.path.exists(dest_folder):
             # Assume it's a git repo, pull updates
             subprocess.run(['git', 'pull'], cwd=dest_folder, check=True)
-            print(f"{Fore.GREEN}Updated {repo_url} in {dest_folder}{Style.RESET_ALL}")
+            print(f"{Fore.CYAN}Updated {repo_url} in {dest_folder}{Style.RESET_ALL}")
         else:
             subprocess.run(['git', 'clone', repo_url, dest_folder], check=True)
             print(f"{Fore.GREEN}Cloned {repo_url} to {dest_folder}{Style.RESET_ALL}")
@@ -30,7 +30,7 @@ def run_mapper_agent(agent_folder, agent_name, outputs_folder, param):
             if os.path.exists(output_json):
                 dest = os.path.join(outputs_folder, f"{agent_name}_output.json")
                 shutil.copy(output_json, dest)
-                print(f"{Fore.GREEN}Collected output from {agent_name} to {dest}{Style.RESET_ALL}")
+                print(f"{Fore.BLUE}Collected output from {agent_name} to {dest}{Style.RESET_ALL}")
             else:
                 print(f"{Fore.YELLOW}output.json not found in {agent_folder}{Style.RESET_ALL}")
         except subprocess.CalledProcessError as e:
@@ -49,7 +49,7 @@ def run_reporter_agent(agent_folder, agent_name, outputs_folder):
             if os.path.exists(output_json):
                 dest = os.path.join(outputs_folder, f"{agent_name}_output.json")
                 shutil.copy(output_json, dest)
-                print(f"{Fore.GREEN}Collected JSON output from {agent_name} to {dest}{Style.RESET_ALL}")
+                print(f"{Fore.CYAN}Collected JSON output from {agent_name} to {dest}{Style.RESET_ALL}")
             else:
                 print(f"{Fore.YELLOW}output.json not found in {agent_folder}{Style.RESET_ALL}")
 
@@ -58,7 +58,7 @@ def run_reporter_agent(agent_folder, agent_name, outputs_folder):
             if os.path.exists(output_html):
                 dest = os.path.join(outputs_folder, f"{agent_name}_report.html")
                 shutil.copy(output_html, dest)
-                print(f"{Fore.GREEN}Collected HTML report from {agent_name} to {dest}{Style.RESET_ALL}")
+                print(f"{Fore.MAGENTA}Collected HTML report from {agent_name} to {dest}{Style.RESET_ALL}")
             else:
                 print(f"{Fore.YELLOW}output.html not found in {agent_folder}{Style.RESET_ALL}")
 
@@ -71,7 +71,7 @@ def run_reporter_agent(agent_folder, agent_name, outputs_folder):
                     src = os.path.join(reporter_output_dir, file)
                     dest = os.path.join(agent_output_dir, file)
                     shutil.copy(src, dest)
-                    print(f"{Fore.GREEN}Collected {file} from {agent_name} to {dest}{Style.RESET_ALL}")
+                    print(f"{Fore.LIGHTCYAN_EX}Collected {file} from {agent_name} to {dest}{Style.RESET_ALL}")
         except subprocess.CalledProcessError as e:
             print(f"{Fore.RED}Failed to run {agent_name}: {e}{Style.RESET_ALL}")
     else:
@@ -92,7 +92,7 @@ def run_organizer_agent(agent_folder, agent_name, outputs_folder, param):
                     src = os.path.join(organizer_output_dir, file)
                     dest = os.path.join(agent_output_dir, file)
                     shutil.copy(src, dest)
-                    print(f"{Fore.GREEN}Collected {file} from {agent_name} to {dest}{Style.RESET_ALL}")
+                    print(f"{Fore.LIGHTMAGENTA_EX}Collected {file} from {agent_name} to {dest}{Style.RESET_ALL}")
         except subprocess.CalledProcessError as e:
             print(f"{Fore.RED}Failed to run {agent_name}: {e}{Style.RESET_ALL}")
     else:
@@ -127,7 +127,7 @@ def main():
             next_num = 1
         archive_dest = os.path.join(archive_folder, f"output-{next_num:05d}")
         shutil.move(outputs_folder, archive_dest)
-        print(f"{Fore.GREEN}Archived existing outputs to {archive_dest}{Style.RESET_ALL}")
+        print(f"{Fore.MAGENTA}Archived existing outputs to {archive_dest}{Style.RESET_ALL}")
 
     print_ascii_art('dirs', "Setting up workspace directories...")
     # Create directories
