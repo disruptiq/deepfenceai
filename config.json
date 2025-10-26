@@ -1,0 +1,19 @@
+{
+  "mapper_agents": [
+    {
+      "name": "layer-1-mapper",
+      "repo": "https://github.com/disruptiq/mapper-agent"
+    }
+  ],
+  "organizer_agents": [
+    {
+      "type": "static-organizer-agent",
+      "name": "static-organizer-agent",
+      "repo": "https://github.com/disruptiq/static-organizer-agent"
+    }
+  ],
+  "reporter_agent": {
+    "name": "reporter",
+    "repo": "https://github.com/disruptiq/reporter-agent"
+  }
+}
