@@ -6,7 +6,7 @@ except ImportError:
     print("colorama not installed. Installing...")
     import subprocess
     import sys
-    subprocess.run([sys.executable, '-m', 'pip', 'install', 'colorama'], check=True)
+    subprocess.run([sys.executable, '-m', 'pip', 'install', '--quiet', 'colorama'], check=True)
     import colorama
     colorama.init()
     from colorama import Fore, Back, Style

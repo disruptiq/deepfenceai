@@ -5,9 +5,13 @@ import shutil
 import sys
 import pathlib
 import webbrowser
+import threading
+import concurrent.futures
+import time
 
 from src.ascii_art import print_ascii_art, Fore, Style
 
+print_lock = threading.Lock()
 
 def clone_repo(repo_url, dest_folder):
     """Clone or update a GitHub repository in the specified folder."""
@@ -15,12 +19,15 @@ def clone_repo(repo_url, dest_folder):
         if os.path.exists(dest_folder):
             # Assume it's a git repo, pull updates
             subprocess.run(['git', 'pull'], cwd=dest_folder, check=True)
-            print(f"{Fore.CYAN}Updated {repo_url} in {dest_folder}{Style.RESET_ALL}")
+            with print_lock:
+                print(f"{Fore.CYAN}Updated {repo_url} in {dest_folder}{Style.RESET_ALL}")
         else:
             subprocess.run(['git', 'clone', repo_url, dest_folder], check=True)
-            print(f"{Fore.GREEN}Cloned {repo_url} to {dest_folder}{Style.RESET_ALL}")
+            with print_lock:
+                print(f"{Fore.GREEN}Cloned {repo_url} to {dest_folder}{Style.RESET_ALL}")
     except subprocess.CalledProcessError as e:
-        print(f"{Fore.RED}Failed to clone/update {repo_url}: {e}{Style.RESET_ALL}")
+        with print_lock:
+            print(f"{Fore.RED}Failed to clone/update {repo_url}: {e}{Style.RESET_ALL}")
 
 def run_mapper_agent(agent_folder, agent_name, outputs_folder, param):
     """Run the mapper agent and collect its output.json."""
@@ -145,6 +152,7 @@ def run_organizer_agent(agent_folder, agent_name, outputs_folder, param):
         print(f"{Fore.YELLOW}main.py not found in {agent_folder}{Style.RESET_ALL}")
 
 def main():
+    start_time = time.time()
     print_ascii_art('start', "Initializing DeepFence AI system...")
 
     # Get param from command line
@@ -182,27 +190,32 @@ def main():
     os.makedirs(outputs_folder, exist_ok=True)
 
     print_ascii_art('clone', "Fetching agent repositories...")
-    # Clone mapper agents
+    clone_tasks = []
+    # Collect mapper agents
     for agent in config.get('mapper_agents', []):
         name = agent['name']
         repo = agent['repo']
         dest = os.path.join(agents_folder, name)
-        clone_repo(repo, dest)
+        clone_tasks.append((repo, dest))
 
-    # Clone organizer agents
+    # Collect organizer agents
     for agent in config.get('organizer_agents', []):
         name = agent['name']
         repo = agent['repo']
         dest = os.path.join(agents_folder, name)
-        clone_repo(repo, dest)
+        clone_tasks.append((repo, dest))
 
-    # Clone reporter agent
+    # Collect reporter agent
     reporter = config.get('reporter_agent')
     if reporter:
         name = reporter['name']
         repo = reporter['repo']
         dest = os.path.join(agents_folder, name)
-        clone_repo(repo, dest)
+        clone_tasks.append((repo, dest))
+
+    # Clone in parallel
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        executor.map(lambda task: clone_repo(*task), clone_tasks)
 
     print_ascii_art('mapper', "Launching mapper agents to process data...")
     # Run mapper agents and collect outputs
@@ -226,6 +239,9 @@ def main():
         run_reporter_agent(agent_folder, name, outputs_folder)
 
     print_ascii_art('complete', "DeepFence AI processing completed!")
+
+    elapsed_time = time.time() - start_time
+    print(f"{Fore.BLUE}Total execution time: {elapsed_time:.2f} seconds{Style.RESET_ALL}")
 
 if __name__ == '__main__':
     main()
