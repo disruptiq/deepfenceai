@@ -78,13 +78,29 @@ def run_reporter_agent(agent_folder, agent_name, outputs_folder):
                         shutil.copy(src, dest)
                     print(f"{Fore.LIGHTCYAN_EX}Collected {file} from {agent_name} to {dest}{Style.RESET_ALL}")
 
-            # Copy the entirety of the reporter agent repo to the collected reports area
-            collected_reports_dir = os.path.join(outputs_folder, 'reporter_reports')
-            shutil.copytree(agent_folder, collected_reports_dir, dirs_exist_ok=True)
-            print(f"{Fore.GREEN}Copied entire reporter agent repo to collected reports area: {collected_reports_dir}{Style.RESET_ALL}")
+            # # Copy the entirety of the reporter agent repo to the collected reports area
+            # collected_reports_dir = os.path.join(outputs_folder, 'reporter_reports')
+            # shutil.copytree(agent_folder, collected_reports_dir, dirs_exist_ok=True)
+            # print(f"{Fore.GREEN}Copied entire reporter agent repo to collected reports area: {collected_reports_dir}{Style.RESET_ALL}")
+
+            # Ensure reporter collected reports dir exists
+            collected_reports_dir = os.path.join(outputs_folder, 'reporter')
+            os.makedirs(collected_reports_dir, exist_ok=True)
+
+            # Copy topological graph from mapper-agent to reporter outputs
+            src_topo = os.path.join(outputs_folder, 'mapper-agent', 'topological-graph-output.json')
+            dst_topo = os.path.join(collected_reports_dir, 'reports', 'topological-graph-output.json')
+            if os.path.exists(src_topo):
+                try:
+                    shutil.copy2(src_topo, dst_topo)
+                    print(f"{Fore.GREEN}Copied topological graph to {dst_topo}{Style.RESET_ALL}")
+                except Exception as e:
+                    print(f"{Fore.RED}Failed to copy topological graph: {e}{Style.RESET_ALL}")
+            else:
+                print(f"{Fore.YELLOW}Source topological graph not found at {src_topo}{Style.RESET_ALL}")
 
             # Recursively find the HTML document in that dir and open it
-            html_files = list(pathlib.Path(collected_reports_dir).rglob("*.html"))
+            html_files = [p for p in pathlib.Path(collected_reports_dir).rglob('*.html') if p.name.lower() == 'cybersecurity-report.html']
             if html_files:
                 html_file = str(html_files[0])  # Take the first one
                 print(f"{Fore.BLUE}HTML report available at: {html_file}{Style.RESET_ALL}")
