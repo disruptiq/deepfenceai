@@ -18,16 +18,28 @@ def clone_repo(repo_url, dest_folder):
     try:
         if os.path.exists(dest_folder):
             # Assume it's a git repo, pull updates
-            subprocess.run(['git', 'pull'], cwd=dest_folder, check=True)
+            result = subprocess.run(['git', 'pull'], cwd=dest_folder, capture_output=True, text=True, check=True)
             with print_lock:
                 print(f"{Fore.CYAN}Updated {repo_url} in {dest_folder}{Style.RESET_ALL}")
+                if result.stdout:
+                    print(result.stdout.rstrip())
+                if result.stderr:
+                    print(result.stderr.rstrip())
         else:
-            subprocess.run(['git', 'clone', repo_url, dest_folder], check=True)
+            result = subprocess.run(['git', 'clone', repo_url, dest_folder], capture_output=True, text=True, check=True)
             with print_lock:
                 print(f"{Fore.GREEN}Cloned {repo_url} to {dest_folder}{Style.RESET_ALL}")
+                if result.stdout:
+                    print(result.stdout.rstrip())
+                if result.stderr:
+                    print(result.stderr.rstrip())
     except subprocess.CalledProcessError as e:
         with print_lock:
             print(f"{Fore.RED}Failed to clone/update {repo_url}: {e}{Style.RESET_ALL}")
+            if e.stdout:
+                print(e.stdout.rstrip())
+            if e.stderr:
+                print(e.stderr.rstrip())
 
 def run_mapper_agent(agent_folder, agent_name, outputs_folder, param):
     """Run the mapper agent and collect its output.json."""
